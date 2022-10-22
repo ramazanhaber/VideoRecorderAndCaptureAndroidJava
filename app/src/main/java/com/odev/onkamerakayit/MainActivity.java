@@ -3,12 +3,15 @@ package com.odev.onkamerakayit;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.ShareCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -101,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 videoPath = data.getData();
                 Toast.makeText(this, "Video Kaydedildi Path : " + videoPath, Toast.LENGTH_SHORT).show();
+                Log.i("videopat",videoPath.toString());
+                videoShare(videoPath.toString());
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "Video iptal edildi...", Toast.LENGTH_SHORT).show();
             } else {
@@ -116,5 +121,22 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Hata", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    public void videoShare(String filePath){
+        try{
+            File videoFile = new File(filePath);
+            Uri videoURI = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                    ? FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), videoFile)
+                    : Uri.fromFile(videoFile);
+            ShareCompat.IntentBuilder.from(MainActivity.this)
+                    .setStream(videoURI)
+                    .setType("video/mp4")
+                    .setChooserTitle("Share video...")
+                    .startChooser();
+        }catch (Exception ex){
+            Toast.makeText(this, "HATA "+ex.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+
     }
 }
